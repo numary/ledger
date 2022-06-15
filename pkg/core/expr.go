@@ -9,7 +9,7 @@ import (
 )
 
 type EvalContext struct {
-	Variables map[string]interface{}
+	Variables map[string]any
 	Metadata  Metadata
 	Asset     string
 }
@@ -19,7 +19,7 @@ type Expr interface {
 }
 
 type Value interface {
-	eval(ctx EvalContext) interface{}
+	eval(ctx EvalContext) any
 }
 
 type ExprOr []Expr
@@ -34,7 +34,7 @@ func (o ExprOr) Eval(ctx EvalContext) bool {
 }
 
 func (e ExprOr) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"$or": []Expr(e),
 	})
 }
@@ -51,7 +51,7 @@ func (o ExprAnd) Eval(ctx EvalContext) bool {
 }
 
 func (e ExprAnd) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"$and": []Expr(e),
 	})
 }
@@ -66,8 +66,8 @@ func (o *ExprEq) Eval(ctx EvalContext) bool {
 }
 
 func (e ExprEq) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"$eq": []interface{}{e.Op1, e.Op2},
+	return json.Marshal(map[string]any{
+		"$eq": []any{e.Op1, e.Op2},
 	})
 }
 
@@ -81,8 +81,8 @@ func (o *ExprGt) Eval(ctx EvalContext) bool {
 }
 
 func (e ExprGt) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"$gt": []interface{}{e.Op1, e.Op2},
+	return json.Marshal(map[string]any{
+		"$gt": []any{e.Op1, e.Op2},
 	})
 }
 
@@ -96,8 +96,8 @@ func (o *ExprLt) Eval(ctx EvalContext) bool {
 }
 
 func (e ExprLt) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"$lt": []interface{}{e.Op1, e.Op2},
+	return json.Marshal(map[string]any{
+		"$lt": []any{e.Op1, e.Op2},
 	})
 }
 
@@ -111,8 +111,8 @@ func (o *ExprGte) Eval(ctx EvalContext) bool {
 }
 
 func (e ExprGte) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"$gte": []interface{}{e.Op1, e.Op2},
+	return json.Marshal(map[string]any{
+		"$gte": []any{e.Op1, e.Op2},
 	})
 }
 
@@ -126,16 +126,16 @@ func (o *ExprLte) Eval(ctx EvalContext) bool {
 }
 
 func (e ExprLte) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"$lte": []interface{}{e.Op1, e.Op2},
+	return json.Marshal(map[string]any{
+		"$lte": []any{e.Op1, e.Op2},
 	})
 }
 
 type ConstantExpr struct {
-	Value interface{}
+	Value any
 }
 
-func (e ConstantExpr) eval(ctx EvalContext) interface{} {
+func (e ConstantExpr) eval(ctx EvalContext) any {
 	return e.Value
 }
 
@@ -147,7 +147,7 @@ type VariableExpr struct {
 	Name string
 }
 
-func (e VariableExpr) eval(ctx EvalContext) interface{} {
+func (e VariableExpr) eval(ctx EvalContext) any {
 	return ctx.Variables[e.Name]
 }
 
@@ -159,19 +159,19 @@ type MetaExpr struct {
 	Name string
 }
 
-func (e MetaExpr) eval(ctx EvalContext) interface{} {
+func (e MetaExpr) eval(ctx EvalContext) any {
 	return string(ctx.Metadata[e.Name])
 }
 
 func (e MetaExpr) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"$meta": e.Name,
 	})
 }
 
-func parse(v interface{}) (expr interface{}, err error) {
+func parse(v any) (expr any, err error) {
 	switch vv := v.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		if len(vv) != 1 {
 			return nil, errors.New("malformed expression")
 		}
@@ -186,7 +186,7 @@ func parse(v interface{}) (expr interface{}, err error) {
 					}
 					return &MetaExpr{Name: value}, nil
 				case "$or", "$and":
-					slice, ok := vvv.([]interface{})
+					slice, ok := vvv.([]any)
 					if !ok {
 						return nil, errors.New("Expected slice for operator " + key)
 					}

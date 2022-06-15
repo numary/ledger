@@ -15,7 +15,7 @@ import (
 func (s *Store) appendLog(ctx context.Context, exec executor, log ...core.Log) error {
 	var (
 		query string
-		args  []interface{}
+		args  []any
 	)
 
 	switch s.Schema().Flavor() {
@@ -54,7 +54,7 @@ func (s *Store) appendLog(ctx context.Context, exec executor, log ...core.Log) e
 		query = fmt.Sprintf(
 			`INSERT INTO "%s".log (id, type, hash, date, data) (SELECT * FROM unnest($1::int[], $2::varchar[], $3::varchar[], $4::timestamptz[], $5::jsonb[]))`,
 			s.schema.Name())
-		args = []interface{}{
+		args = []any{
 			ids, types, hashes, dates, datas,
 		}
 	}

@@ -22,7 +22,7 @@ type ledgerMonitor struct {
 	publisher *sharedpublish.TopicMapperPublisher
 }
 
-func (l *ledgerMonitor) publish(ctx context.Context, ledger string, et string, data interface{}) {
+func (l *ledgerMonitor) publish(ctx context.Context, ledger string, et string, data any) {
 	err := l.publisher.Publish(ctx, et, baseEvent{
 		Date:    time.Now(),
 		Type:    et,

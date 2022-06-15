@@ -15,7 +15,7 @@ func (c *Contract) UnmarshalJSON(data []byte) error {
 	type AuxContract Contract
 	type Aux struct {
 		AuxContract
-		Expr map[string]interface{} `json:"expr"`
+		Expr map[string]any `json:"expr"`
 	}
 	aux := Aux{}
 	err := json.Unmarshal(data, &aux)

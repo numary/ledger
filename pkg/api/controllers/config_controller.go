@@ -12,9 +12,9 @@ import (
 )
 
 type ConfigInfo struct {
-	Server  string      `json:"server"`
-	Version interface{} `json:"version"`
-	Config  *Config     `json:"config"`
+	Server  string  `json:"server"`
+	Version any     `json:"version"`
+	Config  *Config `json:"config"`
 }
 
 type Config struct {
@@ -58,13 +58,13 @@ func (ctl *ConfigController) GetInfo(c *gin.Context) {
 //go:embed swagger.yaml
 var swagger string
 
-func parseSwagger(version string) map[string]interface{} {
-	ret := make(map[string]interface{})
+func parseSwagger(version string) map[string]any {
+	ret := make(map[string]any)
 	err := yaml.NewDecoder(bytes.NewBufferString(swagger)).Decode(&ret)
 	if err != nil {
 		panic(err)
 	}
-	ret["info"].(map[string]interface{})["version"] = version
+	ret["info"].(map[string]any)["version"] = version
 	return ret
 }
 

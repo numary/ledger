@@ -36,7 +36,7 @@ func (m Metadata) IsReverted() bool {
 }
 
 // Scan - Implement the database/sql scanner interface
-func (m *Metadata) Scan(value interface{}) error {
+func (m *Metadata) Scan(value any) error {
 	if value == nil {
 		return nil
 	}
@@ -56,7 +56,7 @@ func (m *Metadata) Scan(value interface{}) error {
 	}
 }
 
-func (m Metadata) ConvertValue(v interface{}) (driver.Value, error) {
+func (m Metadata) ConvertValue(v any) (driver.Value, error) {
 	return json.Marshal(v)
 }
 
@@ -72,7 +72,7 @@ func RevertMetadataSpecKey() string {
 	return SpecMetadata(revertKey)
 }
 
-func ComputeMetadata(key string, value interface{}) Metadata {
+func ComputeMetadata(key string, value any) Metadata {
 	data, err := json.Marshal(value)
 	if err != nil {
 		panic(err)

@@ -7,10 +7,10 @@ import (
 )
 
 type baseEvent struct {
-	Date    time.Time   `json:"date"`
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
-	Ledger  string      `json:"ledger"`
+	Date    time.Time `json:"date"`
+	Type    string    `json:"type"`
+	Payload any       `json:"payload"`
+	Ledger  string    `json:"ledger"`
 }
 
 type committedTransactions struct {

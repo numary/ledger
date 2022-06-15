@@ -11,23 +11,23 @@ import (
 func TestRules(t *testing.T) {
 
 	type testCase struct {
-		rule             map[string]interface{}
+		rule             map[string]any
 		context          EvalContext
 		shouldBeAccepted bool
 	}
 
 	var tests = []testCase{
 		{
-			rule: map[string]interface{}{
-				"$or": []interface{}{
-					map[string]interface{}{
-						"$gt": []interface{}{
+			rule: map[string]any{
+				"$or": []any{
+					map[string]any{
+						"$gt": []any{
 							"$balance", float64(0),
 						},
 					},
-					map[string]interface{}{
-						"$eq": []interface{}{
-							map[string]interface{}{
+					map[string]any{
+						"$eq": []any{
+							map[string]any{
 								"$meta": "approved",
 							},
 							"yes",
@@ -36,7 +36,7 @@ func TestRules(t *testing.T) {
 				},
 			},
 			context: EvalContext{
-				Variables: map[string]interface{}{
+				Variables: map[string]any{
 					"balance": float64(-10),
 				},
 				Metadata: map[string]json.RawMessage{
@@ -46,22 +46,22 @@ func TestRules(t *testing.T) {
 			shouldBeAccepted: true,
 		},
 		{
-			rule: map[string]interface{}{
-				"$or": []interface{}{
-					map[string]interface{}{
-						"$gte": []interface{}{
+			rule: map[string]any{
+				"$or": []any{
+					map[string]any{
+						"$gte": []any{
 							"$balance", float64(0),
 						},
 					},
-					map[string]interface{}{
-						"$lte": []interface{}{
+					map[string]any{
+						"$lte": []any{
 							"$balance", float64(0),
 						},
 					},
 				},
 			},
 			context: EvalContext{
-				Variables: map[string]interface{}{
+				Variables: map[string]any{
 					"balance": float64(-100),
 				},
 				Metadata: map[string]json.RawMessage{},

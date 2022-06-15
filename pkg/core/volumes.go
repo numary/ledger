@@ -39,7 +39,7 @@ func (v Volumes) Balances() Balances {
 type AggregatedVolumes map[string]Volumes
 
 // Scan - Implement the database/sql scanner interface
-func (m *AggregatedVolumes) Scan(value interface{}) error {
+func (m *AggregatedVolumes) Scan(value any) error {
 	if value == nil {
 		return nil
 	}

@@ -52,7 +52,7 @@ func (s *Store) saveMapping(ctx context.Context, exec executor, mapping core.Map
 
 	var (
 		sqlq string
-		args []interface{}
+		args []any
 	)
 	switch s.schema.Flavor() {
 	case sqlbuilder.Flavor(PostgreSQL):

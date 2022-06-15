@@ -268,7 +268,7 @@ func testGetAccounts(t *testing.T, store *sqlstorage.Store) {
 
 	accounts, err = store.GetAccounts(context.Background(), query.Accounts{
 		Limit: 10,
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"address": ".*der.*",
 		},
 	})
@@ -278,7 +278,7 @@ func testGetAccounts(t *testing.T, store *sqlstorage.Store) {
 
 	accounts, err = store.GetAccounts(context.Background(), query.Accounts{
 		Limit: 10,
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"metadata": map[string]string{
 				"foo": "bar",
 			},
@@ -289,7 +289,7 @@ func testGetAccounts(t *testing.T, store *sqlstorage.Store) {
 
 	accounts, err = store.GetAccounts(context.Background(), query.Accounts{
 		Limit: 10,
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"metadata": map[string]string{
 				"number": "3",
 			},
@@ -300,7 +300,7 @@ func testGetAccounts(t *testing.T, store *sqlstorage.Store) {
 
 	accounts, err = store.GetAccounts(context.Background(), query.Accounts{
 		Limit: 10,
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"metadata": map[string]string{
 				"boolean": "true",
 			},
@@ -311,7 +311,7 @@ func testGetAccounts(t *testing.T, store *sqlstorage.Store) {
 
 	accounts, err = store.GetAccounts(context.Background(), query.Accounts{
 		Limit: 10,
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"metadata": map[string]string{
 				"a.super.nested.key": "hello",
 			},
@@ -379,7 +379,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		assert.EqualValues(t, 3, count)
 
 		count, err = store.CountTransactions(context.Background(), query.Transactions{
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"account": "world",
 			},
 		})
@@ -388,7 +388,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		assert.EqualValues(t, 2, count)
 
 		count, err = store.CountTransactions(context.Background(), query.Transactions{
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"start_time": now.Add(-2 * time.Hour),
 				"end_time":   now.Add(-1 * time.Hour),
 			},
@@ -415,7 +415,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		assert.Equal(t, 1, cursor.PageSize)
 
 		cursor, err = store.GetTransactions(context.Background(), query.Transactions{
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"account":   "world",
 				"reference": "tx1",
 			},
@@ -427,7 +427,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		assert.Len(t, cursor.Data, 1)
 
 		cursor, err = store.GetTransactions(context.Background(), query.Transactions{
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"source": "central_bank",
 			},
 			Limit: 10,
@@ -438,7 +438,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		assert.Len(t, cursor.Data, 1)
 
 		cursor, err = store.GetTransactions(context.Background(), query.Transactions{
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"destination": "users:1",
 			},
 			Limit: 10,
@@ -449,7 +449,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		assert.Len(t, cursor.Data, 1)
 
 		cursor, err = store.GetTransactions(context.Background(), query.Transactions{
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"start_time": now.Add(-2 * time.Hour),
 				"end_time":   now.Add(-1 * time.Hour),
 			},

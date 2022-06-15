@@ -13,7 +13,7 @@ import (
 	"github.com/numary/ledger/pkg/ledger/query"
 )
 
-func (s *Store) buildTransactionsQuery(p map[string]interface{}) (*sqlbuilder.SelectBuilder, TxsPaginationToken) {
+func (s *Store) buildTransactionsQuery(p map[string]any) (*sqlbuilder.SelectBuilder, TxsPaginationToken) {
 	sb := sqlbuilder.NewSelectBuilder()
 	t := TxsPaginationToken{}
 

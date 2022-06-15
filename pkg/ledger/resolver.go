@@ -100,7 +100,7 @@ ret:
 
 const ResolverOptionsKey = `group:"_ledgerResolverOptions"`
 
-func ProvideResolverOption(provider interface{}) fx.Option {
+func ProvideResolverOption(provider any) fx.Option {
 	return fx.Provide(
 		fx.Annotate(provider, fx.ResultTags(ResolverOptionsKey), fx.As(new(ResolverOption))),
 	)

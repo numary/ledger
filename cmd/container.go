@@ -312,7 +312,7 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 			writer = ioutil.Discard
 			res = append(res, opentelemetrytraces.Middleware())
 		}
-		res = append(res, gin.CustomRecoveryWithWriter(writer, func(c *gin.Context, err interface{}) {
+		res = append(res, gin.CustomRecoveryWithWriter(writer, func(c *gin.Context, err any) {
 			switch eerr := err.(type) {
 			case error:
 				_ = c.AbortWithError(http.StatusInternalServerError, eerr)

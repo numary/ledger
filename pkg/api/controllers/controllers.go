@@ -9,7 +9,7 @@ const (
 	versionKey = `name:"_apiVersion"`
 )
 
-func ProvideVersion(provider interface{}) fx.Option {
+func ProvideVersion(provider any) fx.Option {
 	return fx.Provide(
 		fx.Annotate(provider, fx.ResultTags(versionKey)),
 	)

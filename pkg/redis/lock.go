@@ -17,7 +17,7 @@ type StringCmd = redis.StringCmd
 type IntCmd = redis.IntCmd
 
 type Client interface {
-	SetNX(ctx context.Context, lk string, rv interface{}, duration time.Duration) *BoolCmd
+	SetNX(ctx context.Context, lk string, rv any, duration time.Duration) *BoolCmd
 	Get(ctx context.Context, lk string) *StringCmd
 	Del(ctx context.Context, lk ...string) *IntCmd
 }

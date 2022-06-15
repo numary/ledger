@@ -14,7 +14,7 @@ import (
 	"github.com/numary/ledger/pkg/ledger/query"
 )
 
-func (s *Store) buildAccountsQuery(p map[string]interface{}) (*sqlbuilder.SelectBuilder, AccPaginationToken) {
+func (s *Store) buildAccountsQuery(p map[string]any) (*sqlbuilder.SelectBuilder, AccPaginationToken) {
 	sb := sqlbuilder.NewSelectBuilder()
 	t := AccPaginationToken{}
 	sb.From(s.schema.Table("accounts"))

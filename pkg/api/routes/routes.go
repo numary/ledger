@@ -20,14 +20,14 @@ var Module = fx.Options(
 	),
 )
 
-func ProvideMiddlewares(provider interface{}, additionalAnnotations ...fx.Annotation) fx.Option {
+func ProvideMiddlewares(provider any, additionalAnnotations ...fx.Annotation) fx.Option {
 	opts := []fx.Annotation{fx.ResultTags(GlobalMiddlewaresKey)}
 	return fx.Provide(
 		fx.Annotate(provider, append(opts, additionalAnnotations...)...),
 	)
 }
 
-func ProvidePerLedgerMiddleware(provider interface{}, additionalAnnotations ...fx.Annotation) fx.Option {
+func ProvidePerLedgerMiddleware(provider any, additionalAnnotations ...fx.Annotation) fx.Option {
 	opts := []fx.Annotation{fx.ResultTags(PerLedgerMiddlewaresKey)}
 	return fx.Provide(
 		fx.Annotate(provider, append(opts, additionalAnnotations...)...),

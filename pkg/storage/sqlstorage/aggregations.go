@@ -10,7 +10,7 @@ import (
 	"github.com/numary/ledger/pkg/ledger/query"
 )
 
-func (s *Store) countTransactions(ctx context.Context, exec executor, params map[string]interface{}) (uint64, error) {
+func (s *Store) countTransactions(ctx context.Context, exec executor, params map[string]any) (uint64, error) {
 	var count uint64
 
 	sb, _ := s.buildTransactionsQuery(params)
@@ -25,7 +25,7 @@ func (s *Store) CountTransactions(ctx context.Context, q query.Transactions) (ui
 	return s.countTransactions(ctx, s.schema, q.Params)
 }
 
-func (s *Store) countAccounts(ctx context.Context, exec executor, p map[string]interface{}) (uint64, error) {
+func (s *Store) countAccounts(ctx context.Context, exec executor, p map[string]any) (uint64, error) {
 	var count uint64
 
 	sb, _ := s.buildAccountsQuery(p)

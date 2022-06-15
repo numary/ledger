@@ -29,7 +29,7 @@ func (ps Postings) Reverse() {
 }
 
 // Scan - Implement the database/sql scanner interface
-func (p *Postings) Scan(value interface{}) error {
+func (p *Postings) Scan(value any) error {
 	if value == nil {
 		return nil
 	}

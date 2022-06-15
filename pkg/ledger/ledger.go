@@ -134,7 +134,7 @@ func (l *Ledger) processTx(ctx context.Context, ts []core.TransactionData) (*Com
 						}
 
 						if ok = contract.Expr.Eval(core.EvalContext{
-							Variables: map[string]interface{}{
+							Variables: map[string]any{
 								"balance": float64(expectedBalance),
 							},
 							Metadata: account.Metadata,
@@ -297,7 +297,7 @@ func (l *Ledger) GetAccount(ctx context.Context, address string) (core.Account, 
 	return account, nil
 }
 
-func (l *Ledger) SaveMeta(ctx context.Context, targetType string, targetID interface{}, m core.Metadata) error {
+func (l *Ledger) SaveMeta(ctx context.Context, targetType string, targetID any, m core.Metadata) error {
 	unlock, err := l.locker.Lock(ctx, l.name)
 	if err != nil {
 		return NewLockError(err)

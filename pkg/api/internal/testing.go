@@ -33,17 +33,17 @@ import (
 
 var testingLedger string
 
-func Encode(t *testing.T, v interface{}) []byte {
+func Encode(t *testing.T, v any) []byte {
 	data, err := json.Marshal(v)
 	assert.NoError(t, err)
 	return data
 }
 
-func Buffer(t *testing.T, v interface{}) *bytes.Buffer {
+func Buffer(t *testing.T, v any) *bytes.Buffer {
 	return bytes.NewBuffer(Encode(t, v))
 }
 
-func Decode(t *testing.T, reader io.Reader, v interface{}) bool {
+func Decode(t *testing.T, reader io.Reader, v any) bool {
 	err := json.NewDecoder(reader).Decode(v)
 	return assert.NoError(t, err)
 }

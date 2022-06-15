@@ -42,7 +42,7 @@ func (t *Transaction) AppendPosting(p Posting) {
 	t.Postings = append(t.Postings, p)
 }
 
-func Hash(t1, t2 interface{}) string {
+func Hash(t1, t2 any) string {
 	b1, err := json.Marshal(t1)
 	if err != nil {
 		panic(err)

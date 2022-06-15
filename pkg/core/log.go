@@ -14,9 +14,9 @@ const NewTransactionType = "NEW_TRANSACTION"
 type loggedTX Transaction
 
 func (m loggedTX) MarshalJSON() ([]byte, error) {
-	metadata := make(map[string]interface{})
+	metadata := make(map[string]any)
 	for k, v := range m.Metadata {
-		var i interface{}
+		var i any
 		err := json.Unmarshal(v, &i)
 		if err != nil {
 			return nil, err
@@ -25,7 +25,7 @@ func (m loggedTX) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(struct {
 		Transaction
-		Metadata map[string]interface{} `json:"metadata"`
+		Metadata map[string]any `json:"metadata"`
 	}{
 		Transaction: Transaction(m),
 		Metadata:    metadata,
@@ -33,11 +33,11 @@ func (m loggedTX) MarshalJSON() ([]byte, error) {
 }
 
 type Log struct {
-	ID   uint64      `json:"id"`
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
-	Hash string      `json:"hash"`
-	Date time.Time   `json:"date"`
+	ID   uint64    `json:"id"`
+	Type string    `json:"type"`
+	Data any       `json:"data"`
+	Hash string    `json:"hash"`
+	Date time.Time `json:"date"`
 }
 
 func NewTransactionLogWithDate(previousLog *Log, tx Transaction, time time.Time) Log {
@@ -61,9 +61,9 @@ func NewTransactionLog(previousLog *Log, tx Transaction) Log {
 }
 
 type SetMetadata struct {
-	TargetType string      `json:"targetType"`
-	TargetID   interface{} `json:"targetId"`
-	Metadata   Metadata    `json:"metadata"`
+	TargetType string   `json:"targetType"`
+	TargetID   any      `json:"targetId"`
+	Metadata   Metadata `json:"metadata"`
 }
 
 func (s *SetMetadata) UnmarshalJSON(data []byte) error {
@@ -77,7 +77,7 @@ func (s *SetMetadata) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	var id interface{}
+	var id any
 	switch strings.ToUpper(x.TargetType) {
 	case strings.ToUpper(MetaTargetTypeAccount):
 		id = ""
@@ -114,7 +114,7 @@ func NewSetMetadataLog(previousLog *Log, metadata SetMetadata) Log {
 	return l
 }
 
-func HydrateLog(_type string, data string) (interface{}, error) {
+func HydrateLog(_type string, data string) (any, error) {
 	switch _type {
 	case NewTransactionType:
 		tx := Transaction{}

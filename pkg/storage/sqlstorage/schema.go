@@ -32,15 +32,15 @@ func (s *baseSchema) Name() string {
 	return s.name
 }
 
-func (s *baseSchema) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+func (s *baseSchema) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	sharedlogging.GetLogger(ctx).Debugf("QueryContext: %s %s", query, args)
 	return s.DB.QueryContext(ctx, query, args...)
 }
-func (s *baseSchema) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
+func (s *baseSchema) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
 	sharedlogging.GetLogger(ctx).Debugf("QueryRowContext: %s %s", query, args)
 	return s.DB.QueryRowContext(ctx, query, args...)
 }
-func (s *baseSchema) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+func (s *baseSchema) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	sharedlogging.GetLogger(ctx).Debugf("ExecContext: %s %s", query, args)
 	return s.DB.ExecContext(ctx, query, args...)
 }
@@ -82,7 +82,7 @@ func (s *PGSchema) Delete(ctx context.Context) error {
 	return err
 }
 
-func (s *PGSchema) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+func (s *PGSchema) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	rows, err := s.baseSchema.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, errorFromFlavor(PostgreSQL, err)
@@ -90,7 +90,7 @@ func (s *PGSchema) QueryContext(ctx context.Context, query string, args ...inter
 	return rows, nil
 }
 
-func (s *PGSchema) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+func (s *PGSchema) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	ret, err := s.baseSchema.ExecContext(ctx, query, args...)
 	if err != nil {
 		return nil, errorFromFlavor(PostgreSQL, err)
@@ -115,7 +115,7 @@ func (s SQLiteSchema) Delete(ctx context.Context) error {
 	return os.Remove(s.file)
 }
 
-func (s *SQLiteSchema) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+func (s *SQLiteSchema) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	rows, err := s.baseSchema.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, errorFromFlavor(SQLite, err)
@@ -123,7 +123,7 @@ func (s *SQLiteSchema) QueryContext(ctx context.Context, query string, args ...i
 	return rows, nil
 }
 
-func (s *SQLiteSchema) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+func (s *SQLiteSchema) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	ret, err := s.baseSchema.ExecContext(ctx, query, args...)
 	if err != nil {
 		return nil, errorFromFlavor(SQLite, err)
