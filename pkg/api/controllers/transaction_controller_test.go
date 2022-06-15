@@ -40,7 +40,7 @@ func TestPostTransactions(t *testing.T) {
 				{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "central_bank",
 							Amount:      1000,
 							Asset:       "USB",
@@ -67,7 +67,7 @@ func TestPostTransactions(t *testing.T) {
 				{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "central_bank",
 							Amount:      -1000,
 							Asset:       "USB",
@@ -84,7 +84,7 @@ func TestPostTransactions(t *testing.T) {
 				{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "central_bank",
 							Amount:      1000,
 							Asset:       "@TOK",
@@ -101,7 +101,7 @@ func TestPostTransactions(t *testing.T) {
 				{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "#fake",
 							Amount:      1000,
 							Asset:       "TOK",
@@ -135,7 +135,7 @@ func TestPostTransactions(t *testing.T) {
 				{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "bar",
 							Amount:      1000,
 							Asset:       "TOK",
@@ -146,7 +146,7 @@ func TestPostTransactions(t *testing.T) {
 				{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "bar",
 							Amount:      1000,
 							Asset:       "TOK",
@@ -182,7 +182,7 @@ func TestGetTransaction(t *testing.T) {
 				rsp := internal.PostTransaction(t, api, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "central_bank",
 							Amount:      1000,
 							Asset:       "USD",
@@ -195,7 +195,7 @@ func TestGetTransaction(t *testing.T) {
 				txs, _ := internal.DecodeSingleResponse[[]core.Transaction](t, rsp.Body)
 				tx := txs[0]
 				assert.EqualValues(t, core.AggregatedVolumes{
-					"world": core.Volumes{
+					core.WorldAccount: core.Volumes{
 						"USD": {},
 					},
 					"central_bank": core.Volumes{
@@ -203,7 +203,7 @@ func TestGetTransaction(t *testing.T) {
 					},
 				}, tx.PreCommitVolumes)
 				assert.EqualValues(t, core.AggregatedVolumes{
-					"world": core.Volumes{
+					core.WorldAccount: core.Volumes{
 						"USD": {
 							Output: 1000,
 						},
@@ -222,7 +222,7 @@ func TestGetTransaction(t *testing.T) {
 
 				assert.EqualValues(t, core.Postings{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "central_bank",
 						Amount:      1000,
 						Asset:       "USD",
@@ -233,7 +233,7 @@ func TestGetTransaction(t *testing.T) {
 				assert.EqualValues(t, "ref", ret.Reference)
 				assert.NotEmpty(t, ret.Timestamp)
 				assert.EqualValues(t, core.AggregatedVolumes{
-					"world": core.Volumes{
+					core.WorldAccount: core.Volumes{
 						"USD": {},
 					},
 					"central_bank": core.Volumes{
@@ -241,7 +241,7 @@ func TestGetTransaction(t *testing.T) {
 					},
 				}, ret.PreCommitVolumes)
 				assert.EqualValues(t, core.AggregatedVolumes{
-					"world": core.Volumes{
+					core.WorldAccount: core.Volumes{
 						"USD": {
 							Output: 1000,
 						},
@@ -265,7 +265,7 @@ func TestPreviewTransaction(t *testing.T) {
 				rsp := internal.PostTransactionPreview(t, api, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "central_bank",
 							Amount:      1000,
 							Asset:       "USD",
@@ -301,7 +301,7 @@ func TestGetTransactions(t *testing.T) {
 					TransactionData: core.TransactionData{
 						Postings: core.Postings{
 							{
-								Source:      "world",
+								Source:      core.WorldAccount,
 								Destination: "central_bank1",
 								Amount:      1000,
 								Asset:       "USD",
@@ -316,7 +316,7 @@ func TestGetTransactions(t *testing.T) {
 					TransactionData: core.TransactionData{
 						Postings: core.Postings{
 							{
-								Source:      "world",
+								Source:      core.WorldAccount,
 								Destination: "central_bank2",
 								Amount:      1000,
 								Asset:       "USD",
@@ -405,7 +405,7 @@ func TestGetTransactions(t *testing.T) {
 
 				t.Run("source", func(t *testing.T) {
 					rsp = internal.GetTransactions(api, url.Values{
-						"source": []string{"world"},
+						"source": []string{core.WorldAccount},
 					})
 					assert.Equal(t, http.StatusOK, rsp.Result().StatusCode)
 					cursor := internal.DecodeCursorResponse[core.Transaction](t, rsp.Body)
@@ -417,7 +417,7 @@ func TestGetTransactions(t *testing.T) {
 
 				t.Run("account", func(t *testing.T) {
 					rsp = internal.GetTransactions(api, url.Values{
-						"account": []string{"world"},
+						"account": []string{core.WorldAccount},
 					})
 					assert.Equal(t, http.StatusOK, rsp.Result().StatusCode)
 					cursor := internal.DecodeCursorResponse[core.Transaction](t, rsp.Body)
@@ -510,7 +510,7 @@ func TestPostTransactionMetadata(t *testing.T) {
 				rsp := internal.PostTransaction(t, api, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "central_bank",
 							Amount:      1000,
 							Asset:       "USD",

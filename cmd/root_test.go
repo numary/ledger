@@ -3,12 +3,14 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/numary/ledger/internal/pgtesting"
+	"github.com/numary/ledger/pkg/core"
 	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -114,14 +116,17 @@ func TestServer(t *testing.T) {
 				break
 			}
 
-			res, err := http.DefaultClient.Post("http://localhost:3068/"+uuid.New()+"/transactions", "application/json", bytes.NewBufferString(`{
+			res, err := http.DefaultClient.Post(
+				"http://localhost:3068/"+uuid.New()+"/transactions",
+				"application/json",
+				bytes.NewBufferString(fmt.Sprintf(`{
 				"postings": [{
-					"source": "world",
+					"source": %q,
 					"destination": "central_bank",
 					"asset": "USD",
 					"amount": 100
 				}]
-			}`))
+			}`, core.WorldAccount)))
 			if !assert.NoError(t, err) {
 				return
 			}

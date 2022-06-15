@@ -149,7 +149,7 @@ func TestEnoughFunds(t *testing.T) {
 		tx := core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "user:001",
 					Amount:      100,
 					Asset:       "COIN",
@@ -182,7 +182,7 @@ func TestNotEnoughFunds(t *testing.T) {
 		tx := core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "user:002",
 					Amount:      100,
 					Asset:       "COIN",
@@ -245,7 +245,7 @@ func TestMetadata(t *testing.T) {
 		tx := core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "sales:042",
 					Amount:      100,
 					Asset:       "COIN",

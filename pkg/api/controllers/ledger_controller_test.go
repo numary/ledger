@@ -20,7 +20,7 @@ func TestGetStats(t *testing.T) {
 				rsp := internal.PostTransaction(t, h, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "alice",
 							Amount:      100,
 							Asset:       "USD",
@@ -32,7 +32,7 @@ func TestGetStats(t *testing.T) {
 				rsp = internal.PostTransaction(t, h, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "boc",
 							Amount:      100,
 							Asset:       "USD",

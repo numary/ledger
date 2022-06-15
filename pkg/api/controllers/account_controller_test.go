@@ -24,7 +24,7 @@ func TestGetAccounts(t *testing.T) {
 				rsp := internal.PostTransaction(t, api, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "alice",
 							Amount:      100,
 							Asset:       "USD",
@@ -36,7 +36,7 @@ func TestGetAccounts(t *testing.T) {
 				rsp = internal.PostTransaction(t, api, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "bob",
 							Amount:      100,
 							Asset:       "USD",
@@ -63,7 +63,7 @@ func TestGetAccounts(t *testing.T) {
 					cursor := internal.DecodeCursorResponse[core.Account](t, rsp.Body)
 					// 3 accounts: world, bob, alice
 					assert.Len(t, cursor.Data, 3)
-					assert.Equal(t, cursor.Data[0].Address, "world")
+					assert.Equal(t, cursor.Data[0].Address, core.WorldAccount)
 					assert.Equal(t, cursor.Data[1].Address, "bob")
 					assert.Equal(t, cursor.Data[2].Address, "alice")
 				})
@@ -181,7 +181,7 @@ func TestGetAccount(t *testing.T) {
 				rsp := internal.PostTransaction(t, api, core.TransactionData{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Destination: "alice",
 							Amount:      100,
 							Asset:       "USD",

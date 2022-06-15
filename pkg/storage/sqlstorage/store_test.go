@@ -131,7 +131,7 @@ func testSaveTransaction(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",
@@ -177,7 +177,7 @@ func testCountAccounts(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",
@@ -199,7 +199,7 @@ func testAggregateVolumes(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",
@@ -221,7 +221,7 @@ func testAggregateVolumes(t *testing.T, store *sqlstorage.Store) {
 func testGetAccounts(t *testing.T, store *sqlstorage.Store) {
 	account1 := core.NewSetMetadataLog(nil, core.SetMetadata{
 		TargetType: core.MetaTargetTypeAccount,
-		TargetID:   "world",
+		TargetID:   core.WorldAccount,
 		Metadata: core.Metadata{
 			"foo": json.RawMessage(`"bar"`),
 		},
@@ -326,7 +326,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",
@@ -341,7 +341,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",
@@ -380,7 +380,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 
 		count, err = store.CountTransactions(context.Background(), query.Transactions{
 			Params: map[string]interface{}{
-				"account": "world",
+				"account": core.WorldAccount,
 			},
 		})
 		assert.NoError(t, err)
@@ -416,7 +416,7 @@ func testTransactions(t *testing.T, store *sqlstorage.Store) {
 
 		cursor, err = store.GetTransactions(context.Background(), query.Transactions{
 			Params: map[string]interface{}{
-				"account":   "world",
+				"account":   core.WorldAccount,
 				"reference": "tx1",
 			},
 			Limit: 1,
@@ -498,7 +498,7 @@ func testGetTransaction(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",
@@ -514,7 +514,7 @@ func testGetTransaction(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",
@@ -589,7 +589,7 @@ func testLastLog(t *testing.T, store *sqlstorage.Store) {
 		TransactionData: core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "central_bank",
 					Amount:      100,
 					Asset:       "USD",

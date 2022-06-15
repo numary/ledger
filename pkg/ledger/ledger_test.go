@@ -111,7 +111,7 @@ func TestTransaction(t *testing.T) {
 			batch = append(batch, core.TransactionData{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "mint",
 						Asset:       "GEM",
 						Amount:      int64(amount),
@@ -135,7 +135,7 @@ func TestTransaction(t *testing.T) {
 			batch = []core.TransactionData{}
 		}
 
-		world, err := l.GetAccount(context.Background(), "world")
+		world, err := l.GetAccount(context.Background(), core.WorldAccount)
 		require.NoError(t, err)
 
 		expected := int64(-1 * total)
@@ -154,7 +154,7 @@ func TestTransactionBatchWithIntermediateWrongState(t *testing.T) {
 			{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player2",
 						Asset:       "GEM",
 						Amount:      int64(100),
@@ -174,7 +174,7 @@ func TestTransactionBatchWithIntermediateWrongState(t *testing.T) {
 			{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player",
 						Asset:       "GEM",
 						Amount:      int64(100),
@@ -196,7 +196,7 @@ func TestTransactionBatchWithConflictingReference(t *testing.T) {
 			{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player",
 						Asset:       "GEM",
 						Amount:      int64(100),
@@ -218,7 +218,7 @@ func TestTransactionBatchWithConflictingReference(t *testing.T) {
 			{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player",
 						Asset:       "GEM",
 						Amount:      int64(100),
@@ -240,7 +240,7 @@ func TestTransactionExpectedVolumes(t *testing.T) {
 			{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player",
 						Asset:       "USD",
 						Amount:      int64(100),
@@ -250,7 +250,7 @@ func TestTransactionExpectedVolumes(t *testing.T) {
 			{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player",
 						Asset:       "EUR",
 						Amount:      int64(100),
@@ -260,7 +260,7 @@ func TestTransactionExpectedVolumes(t *testing.T) {
 			{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player2",
 						Asset:       "EUR",
 						Amount:      int64(100),
@@ -283,7 +283,7 @@ func TestTransactionExpectedVolumes(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.EqualValues(t, volumes, core.AggregatedVolumes{
-			"world": core.Volumes{
+			core.WorldAccount: core.Volumes{
 				"USD": {
 					Output: 100,
 				},
@@ -316,7 +316,7 @@ func TestBalance(t *testing.T) {
 				Postings: []core.Posting{
 					{
 						Source:      "empty_wallet",
-						Destination: "world",
+						Destination: core.WorldAccount,
 						Amount:      1,
 						Asset:       "COIN",
 					},
@@ -334,7 +334,7 @@ func TestReference(t *testing.T) {
 			Reference: "payment_processor_id_01",
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "payments:001",
 					Amount:      100,
 					Asset:       "COIN",
@@ -382,7 +382,7 @@ func TestAccountMetadata(t *testing.T) {
 				{
 					Postings: core.Postings{
 						{
-							Source:      "world",
+							Source:      core.WorldAccount,
 							Amount:      100,
 							Asset:       "USD",
 							Destination: "users:001",
@@ -411,7 +411,7 @@ func TestTransactionMetadata(t *testing.T) {
 		_, _, err := l.Commit(context.Background(), []core.TransactionData{{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "payments:001",
 					Amount:      100,
 					Asset:       "COIN",
@@ -451,7 +451,7 @@ func TestSaveTransactionMetadata(t *testing.T) {
 		_, _, err := l.Commit(context.Background(), []core.TransactionData{{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "payments:001",
 					Amount:      100,
 					Asset:       "COIN",
@@ -483,7 +483,7 @@ func TestGetTransaction(t *testing.T) {
 			Reference: "bar",
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "payments:001",
 					Amount:      100,
 					Asset:       "COIN",
@@ -507,7 +507,7 @@ func TestGetTransactions(t *testing.T) {
 		tx := core.TransactionData{
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "test_get_transactions",
 					Amount:      100,
 					Asset:       "COIN",
@@ -533,7 +533,7 @@ func TestRevertTransaction(t *testing.T) {
 			Reference: "foo",
 			Postings: []core.Posting{
 				{
-					Source:      "world",
+					Source:      core.WorldAccount,
 					Destination: "payments:001",
 					Amount:      revertAmt,
 					Asset:       "COIN",
@@ -542,7 +542,7 @@ func TestRevertTransaction(t *testing.T) {
 		}})
 		require.NoError(t, err)
 
-		world, err := l.GetAccount(context.Background(), "world")
+		world, err := l.GetAccount(context.Background(), core.WorldAccount)
 		require.NoError(t, err)
 
 		originalBal := world.Balances["COIN"]
@@ -553,7 +553,7 @@ func TestRevertTransaction(t *testing.T) {
 		assert.Equal(t, core.Postings{
 			{
 				Source:      "payments:001",
-				Destination: "world",
+				Destination: core.WorldAccount,
 				Amount:      100,
 				Asset:       "COIN",
 			},
@@ -572,7 +572,7 @@ func TestRevertTransaction(t *testing.T) {
 			By: fmt.Sprint(revertTx.ID),
 		}, v)
 
-		world, err = l.GetAccount(context.Background(), "world")
+		world, err = l.GetAccount(context.Background(), core.WorldAccount)
 		assert.NoError(t, err)
 
 		newBal := world.Balances["COIN"]
@@ -590,7 +590,7 @@ func BenchmarkTransaction1(b *testing.B) {
 			txs = append(txs, core.TransactionData{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "benchmark",
 						Asset:       "COIN",
 						Amount:      10,
@@ -614,7 +614,7 @@ func BenchmarkTransaction_20_1k(b *testing.B) {
 					txs = append(txs, core.TransactionData{
 						Postings: []core.Posting{
 							{
-								Source:      "world",
+								Source:      core.WorldAccount,
 								Destination: "benchmark",
 								Asset:       "COIN",
 								Amount:      10,

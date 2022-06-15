@@ -9,7 +9,7 @@ import (
 func TestReverseMultiple(t *testing.T) {
 	p := Postings{
 		{
-			Source:      "world",
+			Source:      WorldAccount,
 			Destination: "users:001",
 			Amount:      100,
 			Asset:       "COIN",
@@ -31,7 +31,7 @@ func TestReverseMultiple(t *testing.T) {
 		},
 		{
 			Source:      "users:001",
-			Destination: "world",
+			Destination: WorldAccount,
 			Amount:      100,
 			Asset:       "COIN",
 		},
@@ -47,7 +47,7 @@ func TestReverseMultiple(t *testing.T) {
 func TestReverseSingle(t *testing.T) {
 	p := Postings{
 		{
-			Source:      "world",
+			Source:      WorldAccount,
 			Destination: "users:001",
 			Amount:      100,
 			Asset:       "COIN",
@@ -57,7 +57,7 @@ func TestReverseSingle(t *testing.T) {
 	expected := Postings{
 		{
 			Source:      "users:001",
-			Destination: "world",
+			Destination: WorldAccount,
 			Amount:      100,
 			Asset:       "COIN",
 		},

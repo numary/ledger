@@ -11,7 +11,7 @@ func TestReverseTransaction(t *testing.T) {
 		TransactionData: TransactionData{
 			Postings: Postings{
 				{
-					Source:      "world",
+					Source:      WorldAccount,
 					Destination: "users:001",
 					Amount:      100,
 					Asset:       "COIN",
@@ -37,7 +37,7 @@ func TestReverseTransaction(t *testing.T) {
 			},
 			{
 				Source:      "users:001",
-				Destination: "world",
+				Destination: WorldAccount,
 				Amount:      100,
 				Asset:       "COIN",
 			},

@@ -46,7 +46,7 @@ func getPagination(t *testing.T, api *api.API, txsPages, additionalTxs int) func
 			rsp = internal.PostTransaction(t, api, core.TransactionData{
 				Postings: core.Postings{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("accounts:%06d", i),
 						Amount:      10,
 						Asset:       "USD",
@@ -147,7 +147,7 @@ func getPagination(t *testing.T, api *api.API, txsPages, additionalTxs int) func
 
 				// First account of the page
 				if i == 0 {
-					assert.Equal(t, "world",
+					assert.Equal(t, core.WorldAccount,
 						cursor.Data[0].Address)
 				} else {
 					assert.Equal(t,
@@ -173,7 +173,7 @@ func getPagination(t *testing.T, api *api.API, txsPages, additionalTxs int) func
 
 				// First account of the last page
 				if txsPages == 0 {
-					assert.Equal(t, "world",
+					assert.Equal(t, core.WorldAccount,
 						cursor.Data[0].Address)
 				} else {
 					assert.Equal(t,
@@ -200,7 +200,7 @@ func getPagination(t *testing.T, api *api.API, txsPages, additionalTxs int) func
 				}
 
 				// First account of the first page
-				assert.Equal(t, "world",
+				assert.Equal(t, core.WorldAccount,
 					cursor.Data[0].Address)
 
 				// Last account of the first page

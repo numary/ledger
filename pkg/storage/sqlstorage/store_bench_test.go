@@ -116,13 +116,13 @@ func testBenchmarkGetTransactions(b *testing.B, store *sqlstorage.Store) {
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("player%d", i),
 						Asset:       "USD",
 						Amount:      100,
 					},
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("player%d", i+1),
 						Asset:       "USD",
 						Amount:      100,
@@ -157,13 +157,13 @@ func testBenchmarkLastLog(b *testing.B, store *sqlstorage.Store) {
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("player%d", i),
 						Asset:       "USD",
 						Amount:      100,
 					},
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("player%d", i+1),
 						Asset:       "USD",
 						Amount:      100,
@@ -194,13 +194,13 @@ func testBenchmarkAggregateVolumes(b *testing.B, store *sqlstorage.Store) {
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("player%d", i),
 						Asset:       "USD",
 						Amount:      100,
 					},
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("player%d", i+1),
 						Asset:       "USD",
 						Amount:      100,
@@ -222,7 +222,7 @@ func testBenchmarkAggregateVolumes(b *testing.B, store *sqlstorage.Store) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		_, err := store.GetAccountVolumes(context.Background(), "world")
+		_, err := store.GetAccountVolumes(context.Background(), core.WorldAccount)
 		assert.NoError(b, err)
 	}
 
@@ -235,7 +235,7 @@ func testBenchmarkSaveTransactions(b *testing.B, store *sqlstorage.Store) {
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: fmt.Sprintf("player%d", n),
 						Asset:       "USD",
 						Amount:      100,

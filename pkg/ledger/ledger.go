@@ -117,7 +117,7 @@ func (l *Ledger) processTx(ctx context.Context, ts []core.TransactionData) (*Com
 
 		for addr, volumes := range txVolumeAggregator.postCommitVolumes() {
 			for asset, volume := range volumes {
-				if addr == "world" {
+				if addr == core.WorldAccount {
 					continue
 				}
 

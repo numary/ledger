@@ -1,8 +1,6 @@
 package core
 
-const (
-	WORLD = "world"
-)
+const WorldAccount = "world"
 
 type Account struct {
 	Address  string           `json:"address" example:"users:001"`

@@ -130,13 +130,13 @@ var postMigrate = map[string]func(t *testing.T, store *sqlstorage.Store){
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player1",
 						Amount:      100,
 						Asset:       "USD",
 					},
 					{
-						Source:      "world",
+						Source:      core.WorldAccount,
 						Destination: "player2",
 						Amount:      100,
 						Asset:       "USD",
@@ -203,13 +203,13 @@ var postMigrate = map[string]func(t *testing.T, store *sqlstorage.Store){
 
 		if !assert.ElementsMatch(t, []core.Posting{
 			{
-				Source:      "world",
+				Source:      core.WorldAccount,
 				Destination: "player1",
 				Amount:      100,
 				Asset:       "USD",
 			},
 			{
-				Source:      "world",
+				Source:      core.WorldAccount,
 				Destination: "player2",
 				Amount:      100,
 				Asset:       "USD",
@@ -411,13 +411,13 @@ var postMigrate = map[string]func(t *testing.T, store *sqlstorage.Store){
 					TransactionData: core.TransactionData{
 						Postings: core.Postings{
 							{
-								Source:      "world",
+								Source:      core.WorldAccount,
 								Destination: "player1",
 								Amount:      100,
 								Asset:       "USD",
 							},
 							{
-								Source:      "world",
+								Source:      core.WorldAccount,
 								Destination: "player2",
 								Amount:      100,
 								Asset:       "USD",
