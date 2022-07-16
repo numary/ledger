@@ -2,7 +2,6 @@ package bus
 
 import (
 	"context"
-	"time"
 
 	"github.com/numary/go-libs/sharedlogging"
 	"github.com/numary/go-libs/sharedpublish"
@@ -12,23 +11,18 @@ import (
 )
 
 const (
-	CommittedTransactions string = "COMMITTED_TRANSACTIONS"
-	SavedMetadata         string = "SAVED_METADATA"
-	UpdatedMapping        string = "UPDATED_MAPPING"
-	RevertedTransaction   string = "REVERTED_TRANSACTION"
+	CommittedTransactionsLabel string = "COMMITTED_TRANSACTIONS"
+	SavedMetadataLabel         string = "SAVED_METADATA"
+	UpdatedMappingLabel        string = "UPDATED_MAPPING"
+	RevertedTransactionLabel   string = "REVERTED_TRANSACTION"
 )
 
 type ledgerMonitor struct {
 	publisher *sharedpublish.TopicMapperPublisher
 }
 
-func (l *ledgerMonitor) publish(ctx context.Context, ledger string, et string, data interface{}) {
-	err := l.publisher.Publish(ctx, et, baseEvent{
-		Date:    time.Now(),
-		Type:    et,
-		Payload: data,
-		Ledger:  ledger,
-	})
+func (l *ledgerMonitor) publish(ctx context.Context, et string, data interface{}) {
+	err := l.publisher.Publish(ctx, et, data)
 	if err != nil {
 		sharedlogging.GetLogger(ctx).Errorf("Publishing message: %s", err)
 		return
@@ -36,34 +30,33 @@ func (l *ledgerMonitor) publish(ctx context.Context, ledger string, et string, d
 }
 
 func (l *ledgerMonitor) CommittedTransactions(ctx context.Context, ledger string, result *ledger.CommitResult) {
-	l.publish(ctx, ledger, CommittedTransactions, committedTransactions{
+	l.publish(ctx, CommittedTransactionsLabel, NewEvent(ledger, CommittedTransactions{
 		Transactions:      result.GeneratedTransactions,
 		Volumes:           result.PostCommitVolumes,
 		PostCommitVolumes: result.PostCommitVolumes,
 		PreCommitVolumes:  result.PreCommitVolumes,
-	})
+	}))
 }
 
 func (l ledgerMonitor) SavedMetadata(ctx context.Context, ledger string, targetType string, id string, metadata core.Metadata) {
-	l.publish(ctx, ledger, SavedMetadata, savedMetadata{
+	l.publish(ctx, SavedMetadataLabel, NewEvent(ledger, SavedMetadata{
 		TargetType: targetType,
 		TargetID:   id,
 		Metadata:   metadata,
-	})
+	}))
 }
 
 func (l ledgerMonitor) UpdatedMapping(ctx context.Context, ledger string, mapping core.Mapping) {
-	l.publish(ctx, ledger, UpdatedMapping, updatedMapping{
+	l.publish(ctx, UpdatedMappingLabel, NewEvent(ledger, UpdatedMapping{
 		Mapping: mapping,
-	})
+	}))
 }
 
 func (l ledgerMonitor) RevertedTransaction(ctx context.Context, ledger string, reverted, revert *core.Transaction) {
-	l.publish(ctx, ledger, RevertedTransaction,
-		revertedTransaction{
-			RevertedTransaction: *reverted,
-			RevertTransaction:   *revert,
-		})
+	l.publish(ctx, RevertedTransactionLabel, NewEvent(ledger, RevertedTransaction{
+		RevertedTransaction: *reverted,
+		RevertTransaction:   *revert,
+	}))
 }
 
 var _ ledger.Monitor = &ledgerMonitor{}

@@ -10,6 +10,13 @@ type Volumes struct {
 	Output int64 `json:"output"`
 }
 
+func NewVolumes(input, output int64) Volumes {
+	return Volumes{
+		Input:  input,
+		Output: output,
+	}
+}
+
 type VolumesWithBalance struct {
 	Input   int64 `json:"input"`
 	Output  int64 `json:"output"`
@@ -63,4 +70,19 @@ func (a *AccountsAssetsVolumes) Scan(value interface{}) error {
 	default:
 		panic("not handled type")
 	}
+}
+
+func (a AccountsAssetsVolumes) SetVolumes(account, asset string, volumes Volumes) AccountsAssetsVolumes {
+	if assetsVolumes, ok := a[account]; !ok {
+		a[account] = map[string]Volumes{
+			asset: volumes,
+		}
+	} else {
+		assetsVolumes[asset] = volumes
+	}
+	return a
+}
+
+func NewAccountsAssetsVolumes() AccountsAssetsVolumes {
+	return AccountsAssetsVolumes{}
 }

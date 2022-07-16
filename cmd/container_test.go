@@ -48,15 +48,15 @@ func TestContainers(t *testing.T) {
 		{
 			name: "default",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.SQLite.String())
+				v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
 			},
 		},
 		{
 			name: "default-with-opentelemetry-traces-on-stdout",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.SQLite.String())
-				v.Set(otelTracesFlag, true)
-				v.Set(otelTracesExporterFlag, "stdout")
+				v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
+				v.Set(OtelTracesFlag, true)
+				v.Set(OtelTracesExporterFlag, "stdout")
 			},
 			options: []fx.Option{
 				fx.Invoke(fx.Annotate(func(lc fx.Lifecycle, t *testing.T, exp trace.SpanExporter, options ...trace.TracerProviderOption) {
@@ -89,10 +89,10 @@ func TestContainers(t *testing.T) {
 		{
 			name: "default-with-opentelemetry-traces-on-stdout-and-batch",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.SQLite.String())
-				v.Set(otelTracesFlag, true)
-				v.Set(otelTracesExporterFlag, "stdout")
-				v.Set(otelTracesBatchFlag, true)
+				v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
+				v.Set(OtelTracesFlag, true)
+				v.Set(OtelTracesExporterFlag, "stdout")
+				v.Set(OtelTracesBatchFlag, true)
 			},
 			options: []fx.Option{
 				fx.Invoke(fx.Annotate(func(lc fx.Lifecycle, t *testing.T, exp trace.SpanExporter, options ...trace.TracerProviderOption) {
@@ -127,40 +127,40 @@ func TestContainers(t *testing.T) {
 		{
 			name: "default-with-opentelemetry-traces-on-otlp",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.SQLite.String())
-				v.Set(otelTracesFlag, true)
-				v.Set(otelTracesExporterFlag, "otlp")
+				v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
+				v.Set(OtelTracesFlag, true)
+				v.Set(OtelTracesExporterFlag, "otlp")
 			},
 		},
 		{
 			name: "default-with-opentelemetry-traces-on-jaeger",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.SQLite.String())
-				v.Set(otelTracesFlag, true)
-				v.Set(otelTracesExporterFlag, "jaeger")
+				v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
+				v.Set(OtelTracesFlag, true)
+				v.Set(OtelTracesExporterFlag, "jaeger")
 			},
 		},
 		{
 			name: "default-with-opentelemetry-metrics-on-noop",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.SQLite.String())
-				v.Set(otelMetricsFlag, true)
-				v.Set(otelMetricsExporterFlag, "noop")
+				v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
+				v.Set(OtelMetricsFlag, true)
+				v.Set(OtelMetricsExporterFlag, "noop")
 			},
 		},
 		{
 			name: "default-with-opentelemetry-metrics-on-otlp",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.SQLite.String())
-				v.Set(otelMetricsFlag, true)
-				v.Set(otelMetricsExporterFlag, "otlp")
+				v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
+				v.Set(OtelMetricsFlag, true)
+				v.Set(OtelMetricsExporterFlag, "otlp")
 			},
 		},
 		{
 			name: "pg",
 			init: func(v *viper.Viper) {
-				v.Set(storageDriverFlag, sqlstorage.PostgreSQL.String())
-				v.Set(storagePostgresConnectionStringFlag, pgServer.ConnString())
+				v.Set(StorageDriverFlag, sqlstorage.PostgreSQL.String())
+				v.Set(StoragePostgresConnectionStringFlag, pgServer.ConnString())
 			},
 			options: []fx.Option{
 				fx.Invoke(func(lc fx.Lifecycle, t *testing.T, driver storage.Driver, storageFactory storage.Driver) {
@@ -183,20 +183,20 @@ func TestContainers(t *testing.T) {
 		{
 			name: "default-with-lock-strategy-memory",
 			init: func(v *viper.Viper) {
-				v.Set(lockStrategyFlag, "redis")
+				v.Set(LockStrategyFlag, "redis")
 			},
 		},
 		{
 			name: "default-with-lock-strategy-none",
 			init: func(v *viper.Viper) {
-				v.Set(lockStrategyFlag, "none")
+				v.Set(LockStrategyFlag, "none")
 			},
 		},
 		{
 			name: "default-with-lock-strategy-redis",
 			init: func(v *viper.Viper) {
-				v.Set(lockStrategyFlag, "redis")
-				v.Set(lockStrategyRedisUrlFlag, "redis://redis:6789")
+				v.Set(LockStrategyFlag, "redis")
+				v.Set(LockStrategyRedisUrlFlag, "redis://redis:6789")
 			},
 			options: []fx.Option{
 				fx.Invoke(func(lc fx.Lifecycle, resolver *ledger.Resolver) {
@@ -223,7 +223,7 @@ func TestContainers(t *testing.T) {
 				fx.Invoke(func(lc fx.Lifecycle, ch *gochannel.GoChannel, resolver *ledger.Resolver) {
 					lc.Append(fx.Hook{
 						OnStart: func(ctx context.Context) error {
-							messages, err := ch.Subscribe(ctx, bus.SavedMetadata)
+							messages, err := ch.Subscribe(ctx, bus.SavedMetadataLabel)
 							if err != nil {
 								return err
 							}
@@ -270,11 +270,11 @@ func TestContainers(t *testing.T) {
 			)
 			v := viper.New()
 			// Default options
-			v.Set(storageDriverFlag, sqlstorage.SQLite.String())
-			v.Set(storageDirFlag, "/tmp")
+			v.Set(StorageDriverFlag, sqlstorage.SQLite.String())
+			v.Set(StorageDirFlag, "/tmp")
 			//v.Set(storageSQLiteDBNameFlag, uuid.New())
 			tc.init(v)
-			app := NewContainer(v, options...)
+			app := NewContainer(v, os.Stdout, options...)
 
 			require.NoError(t, app.Start(context.Background()))
 			defer func(app *fx.App, ctx context.Context) {

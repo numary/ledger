@@ -9,20 +9,21 @@ import (
 	"github.com/numary/ledger/pkg/opentelemetry"
 	"github.com/numary/ledger/pkg/storage"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/instrument/syncint64"
 )
 
-func transactionsCounter(m metric.Meter) (metric.Int64Counter, error) {
-	return m.NewInt64Counter(opentelemetry.StoreInstrumentationName + ".transactions")
+func transactionsCounter(m metric.Meter) (syncint64.Counter, error) {
+	return m.SyncInt64().Counter(opentelemetry.StoreInstrumentationName + ".transactions")
 }
 
-func revertsCounter(m metric.Meter) (metric.Int64Counter, error) {
-	return m.NewInt64Counter(opentelemetry.StoreInstrumentationName + ".reverts")
+func revertsCounter(m metric.Meter) (syncint64.Counter, error) {
+	return m.SyncInt64().Counter(opentelemetry.StoreInstrumentationName + ".reverts")
 }
 
 type storageDecorator struct {
 	storage.Store
-	transactionsCounter metric.Int64Counter
-	revertsCounter      metric.Int64Counter
+	transactionsCounter syncint64.Counter
+	revertsCounter      syncint64.Counter
 }
 
 func (o *storageDecorator) AppendLog(ctx context.Context, logs ...core.Log) error {
@@ -54,7 +55,7 @@ func (o *storageDecorator) AppendLog(ctx context.Context, logs ...core.Log) erro
 
 var _ storage.Store = &storageDecorator{}
 
-func NewStorageDecorator(underlying storage.Store, counter metric.Int64Counter, revertsCounter metric.Int64Counter) *storageDecorator {
+func NewStorageDecorator(underlying storage.Store, counter syncint64.Counter, revertsCounter syncint64.Counter) *storageDecorator {
 	return &storageDecorator{
 		Store:               underlying,
 		transactionsCounter: counter,
@@ -65,9 +66,9 @@ func NewStorageDecorator(underlying storage.Store, counter metric.Int64Counter, 
 type openTelemetryStorageDriver struct {
 	storage.Driver
 	meter               metric.Meter
-	transactionsCounter metric.Int64Counter
+	transactionsCounter syncint64.Counter
 	once                sync.Once
-	revertsCounter      metric.Int64Counter
+	revertsCounter      syncint64.Counter
 }
 
 func (o *openTelemetryStorageDriver) GetStore(ctx context.Context, name string, create bool) (storage.Store, bool, error) {

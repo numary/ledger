@@ -45,23 +45,28 @@ import (
 	"go.uber.org/fx"
 )
 
-const ServiceName = "ledger"
+const (
+	ServiceName = "ledger"
 
-func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
+	TraceIdHeader = "trace-id"
+)
+
+func NewContainer(v *viper.Viper, stdout io.Writer, userOptions ...fx.Option) *fx.App {
 
 	options := make([]fx.Option, 0)
-	if !v.GetBool(debugFlag) {
+	if !v.GetBool(DebugFlag) {
 		options = append(options, fx.NopLogger)
 	}
 
 	l := logrus.New()
-	if v.GetBool(debugFlag) {
+	l.SetOutput(stdout)
+	if v.GetBool(DebugFlag) {
 		l.Level = logrus.DebugLevel
 	}
 	loggerFactory := sharedlogging.StaticLoggerFactory(sharedlogginglogrus.New(l))
 	sharedlogging.SetFactory(loggerFactory)
 
-	topics := v.GetStringSlice(publisherTopicMappingFlag)
+	topics := v.GetStringSlice(PublisherTopicMappingFlag)
 	mapping := make(map[string]string)
 	for _, topic := range topics {
 		parts := strings.SplitN(topic, ":", 2)
@@ -71,13 +76,13 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 		mapping[parts[0]] = parts[1]
 	}
 
-	if v.GetBool(segmentEnabledFlag) {
-		applicationId := viper.GetString(segmentApplicationId)
+	if v.GetBool(SegmentEnabledFlag) {
+		applicationId := viper.GetString(SegmentApplicationId)
 		if applicationId == "" {
 			applicationId = uuid.New()
 		}
-		writeKey := viper.GetString(segmentWriteKey)
-		interval := viper.GetDuration(segmentHeartbeatInterval)
+		writeKey := viper.GetString(SegmentWriteKey)
+		interval := viper.GetDuration(SegmentHeartbeatInterval)
 		if writeKey == "" {
 			sharedlogging.GetLogger(context.Background()).Error("Segment enabled but no write key provided")
 		} else if interval == 0 {
@@ -91,31 +96,31 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 	options = append(options, sharedpublish.TopicMapperPublisherModule(mapping))
 
 	switch {
-	case v.GetBool(publisherHttpEnabledFlag):
+	case v.GetBool(PublisherHttpEnabledFlag):
 		options = append(options, sharedpublishhttp.Module())
-	case v.GetBool(publisherKafkaEnabledFlag):
+	case v.GetBool(PublisherKafkaEnabledFlag):
 		sarama.Logger = log.New(os.Stdout, "[Sarama] ", log.LstdFlags)
 		options = append(options,
-			sharedpublishkafka.Module(ServiceName, v.GetStringSlice(publisherKafkaBrokerFlag)...),
+			sharedpublishkafka.Module(ServiceName, v.GetStringSlice(PublisherKafkaBrokerFlag)...),
 			sharedpublishkafka.ProvideSaramaOption(
 				sharedpublishkafka.WithConsumerReturnErrors(),
 				sharedpublishkafka.WithProducerReturnSuccess(),
 			),
 		)
-		if v.GetBool(publisherKafkaTLSEnabled) {
+		if v.GetBool(PublisherKafkaTLSEnabled) {
 			options = append(options, sharedpublishkafka.ProvideSaramaOption(sharedpublishkafka.WithTLS()))
 		}
-		if v.GetBool(publisherKafkaSASLEnabled) {
+		if v.GetBool(PublisherKafkaSASLEnabled) {
 			options = append(options, sharedpublishkafka.ProvideSaramaOption(
 				sharedpublishkafka.WithSASLEnabled(),
 				sharedpublishkafka.WithSASLCredentials(
-					v.GetString(publisherKafkaSASLUsername),
-					v.GetString(publisherKafkaSASLPassword),
+					v.GetString(PublisherKafkaSASLUsername),
+					v.GetString(PublisherKafkaSASLPassword),
 				),
-				sharedpublishkafka.WithSASLMechanism(sarama.SASLMechanism(v.GetString(publisherKafkaSASLMechanism))),
+				sharedpublishkafka.WithSASLMechanism(sarama.SASLMechanism(v.GetString(PublisherKafkaSASLMechanism))),
 				sharedpublishkafka.WithSASLScramClient(func() sarama.SCRAMClient {
 					var fn scram.HashGeneratorFcn
-					switch v.GetInt(publisherKafkaSASLScramSHASize) {
+					switch v.GetInt(PublisherKafkaSASLScramSHASize) {
 					case 512:
 						fn = sharedpublishkafka.SHA512
 					case 256:
@@ -132,94 +137,94 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 	}
 
 	// Handle OpenTelemetry
-	if v.GetBool(otelTracesFlag) {
+	if v.GetBool(OtelTracesFlag) {
 		options = append(options, sharedotlptraces.TracesModule(sharedotlptraces.ModuleConfig{
-			Batch:    v.GetBool(otelTracesBatchFlag),
-			Exporter: v.GetString(otelTracesExporterFlag),
+			Batch:    v.GetBool(OtelTracesBatchFlag),
+			Exporter: v.GetString(OtelTracesExporterFlag),
 			JaegerConfig: func() *sharedotlptraces.JaegerConfig {
-				if v.GetString(otelTracesExporterFlag) != sharedotlptraces.JaegerExporter {
+				if v.GetString(OtelTracesExporterFlag) != sharedotlptraces.JaegerExporter {
 					return nil
 				}
 				return &sharedotlptraces.JaegerConfig{
-					Endpoint: v.GetString(otelTracesExporterJaegerEndpointFlag),
-					User:     v.GetString(otelTracesExporterJaegerUserFlag),
-					Password: v.GetString(otelTracesExporterJaegerPasswordFlag),
+					Endpoint: v.GetString(OtelTracesExporterJaegerEndpointFlag),
+					User:     v.GetString(OtelTracesExporterJaegerUserFlag),
+					Password: v.GetString(OtelTracesExporterJaegerPasswordFlag),
 				}
 			}(),
 			OTLPConfig: func() *sharedotlptraces.OTLPConfig {
-				if v.GetString(otelTracesExporterFlag) != sharedotlptraces.OTLPExporter {
+				if v.GetString(OtelTracesExporterFlag) != sharedotlptraces.OTLPExporter {
 					return nil
 				}
 				return &sharedotlptraces.OTLPConfig{
-					Mode:     v.GetString(otelTracesExporterOTLPModeFlag),
-					Endpoint: v.GetString(otelTracesExporterOTLPEndpointFlag),
-					Insecure: v.GetBool(otelTracesExporterOTLPInsecureFlag),
+					Mode:     v.GetString(OtelTracesExporterOTLPModeFlag),
+					Endpoint: v.GetString(OtelTracesExporterOTLPEndpointFlag),
+					Insecure: v.GetBool(OtelTracesExporterOTLPInsecureFlag),
 				}
 			}(),
 		}))
 	}
-	if v.GetBool(otelMetricsFlag) {
+	if v.GetBool(OtelMetricsFlag) {
 		options = append(options, sharedotlpmetrics.MetricsModule(sharedotlpmetrics.MetricsModuleConfig{
-			Exporter: v.GetString(otelMetricsExporterFlag),
+			Exporter: v.GetString(OtelMetricsExporterFlag),
 			OTLPConfig: func() *sharedotlpmetrics.OTLPMetricsConfig {
-				if v.GetString(otelMetricsExporterFlag) != sharedotlpmetrics.OTLPMetricsExporter {
+				if v.GetString(OtelMetricsExporterFlag) != sharedotlpmetrics.OTLPMetricsExporter {
 					return nil
 				}
 				return &sharedotlpmetrics.OTLPMetricsConfig{
-					Mode:     v.GetString(otelMetricsExporterOTLPModeFlag),
-					Endpoint: v.GetString(otelMetricsExporterOTLPEndpointFlag),
-					Insecure: v.GetBool(otelMetricsExporterOTLPInsecureFlag),
+					Mode:     v.GetString(OtelMetricsExporterOTLPModeFlag),
+					Endpoint: v.GetString(OtelMetricsExporterOTLPEndpointFlag),
+					Insecure: v.GetBool(OtelMetricsExporterOTLPInsecureFlag),
 				}
 			}(),
 		}))
 	}
 
-	switch v.GetString(lockStrategyFlag) {
+	switch v.GetString(LockStrategyFlag) {
 	case "memory":
 		options = append(options, ledger.MemoryLockModule())
 	case "none":
 		options = append(options, ledger.NoLockModule())
 	case "redis":
 		var tlsConfig *tls.Config
-		if v.GetBool(lockStrategyRedisTLSEnabledFlag) {
+		if v.GetBool(LockStrategyRedisTLSEnabledFlag) {
 			tlsConfig = &tls.Config{}
-			if v.GetBool(lockStrategyRedisTLSInsecureFlag) {
+			if v.GetBool(LockStrategyRedisTLSInsecureFlag) {
 				tlsConfig.InsecureSkipVerify = true
 			}
 		}
 		options = append(options, redis.Module(redis.Config{
-			Url:          v.GetString(lockStrategyRedisUrlFlag),
-			LockDuration: v.GetDuration(lockStrategyRedisDurationFlag),
-			LockRetry:    v.GetDuration(lockStrategyRedisRetryFlag),
+			Url:          v.GetString(LockStrategyRedisUrlFlag),
+			LockDuration: v.GetDuration(LockStrategyRedisDurationFlag),
+			LockRetry:    v.GetDuration(LockStrategyRedisRetryFlag),
 			TLSConfig:    tlsConfig,
 		}))
 	}
 
 	// Handle api part
 	options = append(options, api.Module(api.Config{
-		StorageDriver: v.GetString(storageDriverFlag),
+		StorageDriver: v.GetString(StorageDriverFlag),
 		Version:       Version,
-		UseScopes:     viper.GetBool(authBearerUseScopesFlag),
+		UseScopes:     viper.GetBool(AuthBearerUseScopesFlag),
 	}))
 
 	// Handle storage driver
 	options = append(options, sqlstorage.DriverModule(sqlstorage.ModuleConfig{
-		StorageDriver: v.GetString(storageDriverFlag),
+		StorageDriver: v.GetString(StorageDriverFlag),
 		SQLiteConfig: func() *sqlstorage.SQLiteConfig {
-			if v.GetString(storageDriverFlag) != sqlstorage.SQLite.String() {
+			if v.GetString(StorageDriverFlag) != sqlstorage.SQLite.String() {
 				return nil
 			}
 			return &sqlstorage.SQLiteConfig{
-				Dir:    v.GetString(storageDirFlag),
-				DBName: v.GetString(storageSQLiteDBNameFlag),
+				Dir:    v.GetString(StorageDirFlag),
+				DBName: v.GetString(StorageSQLiteDBNameFlag),
 			}
 		}(),
 		PostgresConfig: func() *sqlstorage.PostgresConfig {
-			if v.GetString(storageDriverFlag) != sqlstorage.PostgreSQL.String() {
+			if v.GetString(StorageDriverFlag) != sqlstorage.PostgreSQL.String() {
 				return nil
 			}
 			return &sqlstorage.PostgresConfig{
-				ConnString: v.GetString(storagePostgresConnectionStringFlag),
+				ConnString: v.GetString(StoragePostgresConnectionStringFlag),
 			}
 		}(),
 	}))
@@ -231,13 +236,13 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 
 	options = append(options,
 		fx.Decorate(fx.Annotate(func(driver storage.Driver, mp metric.MeterProvider) storage.Driver {
-			if v.GetBool(storageCacheFlag) {
+			if v.GetBool(StorageCacheFlag) {
 				driver = storage.NewCachedStorageDriver(driver)
 			}
-			if v.GetBool(otelTracesFlag) {
+			if v.GetBool(OtelTracesFlag) {
 				driver = opentelemetrytraces.WrapStorageDriver(driver)
 			}
-			if v.GetBool(otelMetricsFlag) {
+			if v.GetBool(OtelMetricsFlag) {
 				driver = opentelemetrymetrics.WrapStorageDriver(driver, mp)
 			}
 			return driver
@@ -252,12 +257,12 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 		if httpBasicMethod := internal.HTTPBasicAuthMethod(v); httpBasicMethod != nil {
 			methods = append(methods, httpBasicMethod)
 		}
-		if v.GetBool(authBearerEnabledFlag) {
+		if v.GetBool(AuthBearerEnabledFlag) {
 			methods = append(methods, sharedauth.NewHttpBearerMethod(
 				sharedauth.NewIntrospectionValidator(
-					oauth2introspect.NewIntrospecter(v.GetString(authBearerIntrospectUrlFlag)),
-					v.GetBool(authBearerAudiencesWildcardFlag),
-					sharedauth.AudienceIn(v.GetStringSlice(authBearerAudienceFlag)...),
+					oauth2introspect.NewIntrospecter(v.GetString(AuthBearerIntrospectUrlFlag)),
+					v.GetBool(AuthBearerAudiencesWildcardFlag),
+					sharedauth.AudienceIn(v.GetStringSlice(AuthBearerAudienceFlag)...),
 				),
 			))
 		}
@@ -288,8 +293,12 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 		cc.AddAllowHeaders("authorization")
 
 		res = append(res, cors.New(cc))
-		if v.GetBool(otelTracesFlag) {
+		if v.GetBool(OtelTracesFlag) {
 			res = append(res, otelgin.Middleware(ServiceName, otelgin.WithTracerProvider(tp)))
+			res = append(res, func(c *gin.Context) {
+				span := trace.SpanFromContext(c.Request.Context())
+				c.Writer.Header().Set(TraceIdHeader, span.SpanContext().TraceID().String())
+			})
 		} else {
 			res = append(res, func(context *gin.Context) {
 				context.Next()
@@ -300,7 +309,7 @@ func NewContainer(v *viper.Viper, userOptions ...fx.Option) *fx.App {
 		}
 		res = append(res, middlewares.Log())
 		var writer io.Writer = os.Stderr
-		if v.GetBool(otelTracesFlag) {
+		if v.GetBool(OtelTracesFlag) {
 			writer = ioutil.Discard
 			res = append(res, opentelemetrytraces.Middleware())
 		}

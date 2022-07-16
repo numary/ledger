@@ -6,14 +6,27 @@ import (
 	"github.com/numary/ledger/pkg/core"
 )
 
-type baseEvent struct {
-	Date    time.Time   `json:"date"`
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
-	Ledger  string      `json:"ledger"`
+type Payload interface {
+	PayloadType() string
 }
 
-type committedTransactions struct {
+type Event[T Payload] struct {
+	Date    time.Time `json:"date"`
+	Type    string    `json:"type"`
+	Payload T         `json:"payload"`
+	Ledger  string    `json:"ledger"`
+}
+
+func NewEvent[T Payload](ledger string, payload T) Event[T] {
+	return Event[T]{
+		Date:    time.Now(),
+		Type:    payload.PayloadType(),
+		Payload: payload,
+		Ledger:  ledger,
+	}
+}
+
+type CommittedTransactions struct {
 	Transactions []core.Transaction `json:"transactions"`
 	// Deprecated (use postCommitVolumes)
 	Volumes           core.AccountsAssetsVolumes `json:"volumes"`
@@ -21,17 +34,33 @@ type committedTransactions struct {
 	PreCommitVolumes  core.AccountsAssetsVolumes `json:"preCommitVolumes"`
 }
 
-type savedMetadata struct {
+func (CommittedTransactions) PayloadType() string {
+	return CommittedTransactionsLabel
+}
+
+type SavedMetadata struct {
 	TargetType string        `json:"targetType"`
 	TargetID   string        `json:"targetId"`
 	Metadata   core.Metadata `json:"metadata"`
 }
 
-type revertedTransaction struct {
+func (SavedMetadata) PayloadType() string {
+	return SavedMetadataLabel
+}
+
+type RevertedTransaction struct {
 	RevertedTransaction core.Transaction `json:"revertedTransaction"`
 	RevertTransaction   core.Transaction `json:"revertTransaction"`
 }
 
-type updatedMapping struct {
+func (RevertedTransaction) PayloadType() string {
+	return RevertedTransactionLabel
+}
+
+type UpdatedMapping struct {
 	Mapping core.Mapping `json:"mapping"`
+}
+
+func (UpdatedMapping) PayloadType() string {
+	return UpdatedMappingLabel
 }
