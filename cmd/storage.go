@@ -27,6 +27,7 @@ func NewStorageInit() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app := NewContainer(
 				viper.GetViper(),
+				cmd.OutOrStdout(),
 				fx.Invoke(func(storageDriver storage.Driver, lc fx.Lifecycle) {
 					lc.Append(fx.Hook{
 						OnStart: func(ctx context.Context) error {
@@ -71,6 +72,7 @@ func NewStorageList() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app := NewContainer(
 				viper.GetViper(),
+				cmd.OutOrStdout(),
 				fx.Invoke(func(storageDriver storage.Driver, lc fx.Lifecycle) {
 					lc.Append(fx.Hook{
 						OnStart: func(ctx context.Context) error {
@@ -104,6 +106,7 @@ func NewStorageUpgrade() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app := NewContainer(
 				viper.GetViper(),
+				cmd.OutOrStdout(),
 				fx.Invoke(func(storageDriver storage.Driver, lc fx.Lifecycle) {
 					lc.Append(fx.Hook{
 						OnStart: func(ctx context.Context) error {
@@ -139,9 +142,9 @@ func NewStorageScan() *cobra.Command {
 
 			var opt fx.Option
 
-			switch viper.GetString(storageDriverFlag) {
+			switch viper.GetString(StorageDriverFlag) {
 			default:
-				return errors.New("Invalid storage driver: " + viper.GetString(storageDriverFlag))
+				return errors.New("Invalid storage driver: " + viper.GetString(StorageDriverFlag))
 			case "postgres":
 				opt = fx.Invoke(func(driver *sqlstorage.Driver, sqlDb *sql.DB, db sqlstorage.DB, lc fx.Lifecycle) {
 					lc.Append(fx.Hook{
@@ -190,7 +193,7 @@ func NewStorageScan() *cobra.Command {
 				opt = fx.Invoke(func(driver *sqlstorage.Driver, db sqlstorage.DB, lc fx.Lifecycle) {
 					lc.Append(fx.Hook{
 						OnStart: func(ctx context.Context) error {
-							files, err := os.ReadDir(viper.GetString(storageDirFlag))
+							files, err := os.ReadDir(viper.GetString(StorageDirFlag))
 							if err != nil {
 								return err
 							}
@@ -205,7 +208,7 @@ func NewStorageScan() *cobra.Command {
 									fmt.Println("Skip file " + f + ".db : Bad name")
 									continue
 								}
-								if parts[0] != viper.GetString(storageSQLiteDBNameFlag) {
+								if parts[0] != viper.GetString(StorageSQLiteDBNameFlag) {
 									fmt.Println("Skip file " + f + ".db : DB name not mathing")
 									continue
 								}
@@ -231,7 +234,7 @@ func NewStorageScan() *cobra.Command {
 				})
 			}
 
-			app := NewContainer(viper.GetViper(), opt)
+			app := NewContainer(viper.GetViper(), cmd.OutOrStdout(), opt)
 			return app.Start(cmd.Context())
 		},
 	}
@@ -245,6 +248,7 @@ func NewStorageDelete() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app := NewContainer(
 				viper.GetViper(),
+				cmd.OutOrStdout(),
 				fx.Invoke(func(storageDriver storage.Driver, lc fx.Lifecycle) {
 					lc.Append(fx.Hook{
 						OnStart: func(ctx context.Context) error {

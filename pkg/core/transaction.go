@@ -30,6 +30,17 @@ func (t *TransactionData) Reverse() TransactionData {
 	return ret
 }
 
+func (t TransactionData) SetReference(reference string) TransactionData {
+	t.Reference = reference
+	return t
+}
+
+func NewTransactionData(postings ...Posting) TransactionData {
+	return TransactionData{
+		Postings: postings,
+	}
+}
+
 type Transaction struct {
 	TransactionData
 	ID                uint64                `json:"txid"`

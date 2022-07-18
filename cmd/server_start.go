@@ -4,6 +4,8 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/numary/go-libs/sharedlogging"
 	"github.com/numary/go-libs/sharedlogging/sharedlogginglogrus"
@@ -15,15 +17,43 @@ import (
 	"go.uber.org/fx"
 )
 
+type serverContext struct {
+	Port int
+}
+
+type serverContextKey struct{}
+
+var serverContextKeyImpl = serverContextKey{}
+
+func instructPort(ctx context.Context, port int) {
+	serverCtx := ctx.Value(serverContextKeyImpl)
+	if serverCtx == nil {
+		return
+	}
+	serverCtx.(*serverContext).Port = port
+}
+
+func NewContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, serverContextKeyImpl, &serverContext{})
+}
+
+func Port(ctx context.Context) int {
+	serverCtx := ctx.Value(serverContextKeyImpl)
+	if serverCtx == nil {
+		return 0
+	}
+	return serverCtx.(*serverContext).Port
+}
+
 func NewServerStart() *cobra.Command {
 	return &cobra.Command{
 		Use: "start",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			l := logrus.New()
-			if viper.GetBool(debugFlag) {
+			if viper.GetBool(DebugFlag) {
 				l.Level = logrus.DebugLevel
 			}
-			if viper.GetBool(otelTracesFlag) {
+			if viper.GetBool(OtelTracesFlag) {
 				l.AddHook(otellogrus.NewHook(otellogrus.WithLevels(
 					logrus.PanicLevel,
 					logrus.FatalLevel,
@@ -36,6 +66,7 @@ func NewServerStart() *cobra.Command {
 
 			app := NewContainer(
 				viper.GetViper(),
+				cmd.OutOrStdout(),
 				fx.Invoke(func(lc fx.Lifecycle, h *api.API) {
 					var (
 						err      error
@@ -43,10 +74,17 @@ func NewServerStart() *cobra.Command {
 					)
 					lc.Append(fx.Hook{
 						OnStart: func(ctx context.Context) error {
-							listener, err = net.Listen("tcp", viper.GetString(serverHttpBindAddressFlag))
+							listener, err = net.Listen("tcp", viper.GetString(ServerHttpBindAddressFlag))
 							if err != nil {
 								return err
 							}
+
+							addrParts := strings.Split(listener.Addr().String(), ":")
+							port, err := strconv.ParseUint(addrParts[len(addrParts)-1], 10, 16)
+							if err != nil {
+								panic(err)
+							}
+							instructPort(cmd.Context(), int(port))
 							go func() {
 								httpErr := http.Serve(listener, h)
 								sharedlogging.Errorf("http.Serve: %s", httpErr)
