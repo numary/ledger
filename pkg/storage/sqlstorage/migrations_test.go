@@ -155,7 +155,7 @@ var postMigrate = map[string]func(t *testing.T, store *sqlstorage.Store){
 			return
 		}
 	},
-	"10": func(t *testing.T, store *sqlstorage.Store) {
+	"11": func(t *testing.T, store *sqlstorage.Store) {
 
 		count, err := store.CountTransactions(context.Background(), storage.TransactionsQuery{})
 		if !assert.NoError(t, err) {
