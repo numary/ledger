@@ -53,11 +53,11 @@ func (s *API) buildTransactionsQuery(p storage.TransactionsQuery) (*sqlbuilder.S
 		t.ReferenceFilter = reference
 	}
 	if !startTime.IsZero() {
-		sb.Where(sb.GE("timestamp", startTime.UTC().Format(time.RFC3339)))
+		sb.Where(sb.GE("timestamp", startTime.UTC()))
 		t.StartTime = startTime
 	}
 	if !endTime.IsZero() {
-		sb.Where(sb.L("timestamp", endTime.UTC().Format(time.RFC3339)))
+		sb.Where(sb.L("timestamp", endTime.UTC()))
 		t.EndTime = endTime
 	}
 
@@ -102,11 +102,11 @@ func (s *API) GetTransactions(ctx context.Context, q storage.TransactionsQuery) 
 	}(rows)
 
 	for rows.Next() {
-		var ref, ts sql.NullString
+		var ref sql.NullString
 		tx := core.Transaction{}
 		if err := rows.Scan(
 			&tx.ID,
-			&ts,
+			&tx.Timestamp,
 			&ref,
 			&tx.Metadata,
 			&tx.Postings,
@@ -119,11 +119,7 @@ func (s *API) GetTransactions(ctx context.Context, q storage.TransactionsQuery) 
 		if tx.Metadata == nil {
 			tx.Metadata = core.Metadata{}
 		}
-		timestamp, err := time.Parse(time.RFC3339, ts.String)
-		if err != nil {
-			return sharedapi.Cursor[core.Transaction]{}, err
-		}
-		tx.Timestamp = timestamp.UTC()
+		tx.Timestamp = tx.Timestamp.UTC()
 		txs = append(txs, tx)
 	}
 	if rows.Err() != nil {
@@ -185,10 +181,10 @@ func (s *API) GetTransaction(ctx context.Context, txId uint64) (*core.Transactio
 		PostCommitVolumes: core.AccountsAssetsVolumes{},
 	}
 
-	var ref, ts sql.NullString
+	var ref sql.NullString
 	if err := row.Scan(
 		&tx.ID,
-		&ts,
+		&tx.Timestamp,
 		&ref,
 		&tx.Metadata,
 		&tx.Postings,
@@ -201,11 +197,7 @@ func (s *API) GetTransaction(ctx context.Context, txId uint64) (*core.Transactio
 		return nil, err
 	}
 
-	t, err := time.Parse(time.RFC3339, ts.String)
-	if err != nil {
-		return nil, err
-	}
-	tx.Timestamp = t.UTC()
+	tx.Timestamp = tx.Timestamp.UTC()
 	tx.Reference = ref.String
 
 	return &tx, nil
@@ -233,10 +225,10 @@ func (s *API) GetLastTransaction(ctx context.Context) (*core.Transaction, error)
 		PostCommitVolumes: core.AccountsAssetsVolumes{},
 	}
 
-	var ref, ts sql.NullString
+	var ref sql.NullString
 	if err := row.Scan(
 		&tx.ID,
-		&ts,
+		&tx.Timestamp,
 		&ref,
 		&tx.Metadata,
 		&tx.Postings,
@@ -249,11 +241,7 @@ func (s *API) GetLastTransaction(ctx context.Context) (*core.Transaction, error)
 		return nil, err
 	}
 
-	t, err := time.Parse(time.RFC3339, ts.String)
-	if err != nil {
-		return nil, err
-	}
-	tx.Timestamp = t.UTC()
+	tx.Timestamp = tx.Timestamp.UTC()
 	tx.Reference = ref.String
 
 	return &tx, nil
@@ -300,13 +288,13 @@ func (s *API) insertTransactions(ctx context.Context, txs ...core.Transaction) e
 				reference = &cp
 			}
 
-			ib.Values(tx.ID, tx.Timestamp.Format(time.RFC3339), reference, postingsData,
+			ib.Values(tx.ID, tx.Timestamp, reference, postingsData,
 				metadataData, preCommitVolumesData, postCommitVolumesData)
 		}
 		query, args = ib.BuildWithFlavor(s.schema.Flavor())
 	case sqlbuilder.PostgreSQL:
 		ids := make([]uint64, len(txs))
-		timestamps := make([]string, len(txs))
+		timestamps := make([]time.Time, len(txs))
 		references := make([]*string, len(txs))
 		postingDataSet := make([]string, len(txs))
 		metadataDataSet := make([]string, len(txs))
@@ -338,7 +326,7 @@ func (s *API) insertTransactions(ctx context.Context, txs ...core.Transaction) e
 			}
 
 			ids[i] = tx.ID
-			timestamps[i] = tx.Timestamp.Format(time.RFC3339)
+			timestamps[i] = tx.Timestamp
 			postingDataSet[i] = string(postingsData)
 			metadataDataSet[i] = string(metadataData)
 			preCommitVolumesDataSet[i] = string(preCommitVolumesData)
@@ -351,7 +339,7 @@ func (s *API) insertTransactions(ctx context.Context, txs ...core.Transaction) e
 		}
 
 		query = fmt.Sprintf(
-			`INSERT INTO "%s".transactions (id, timestamp, reference, postings, metadata, pre_commit_volumes, post_commit_volumes) (SELECT * FROM unnest($1::int[], $2::varchar[], $3::varchar[], $4::jsonb[], $5::jsonb[], $6::jsonb[], $7::jsonb[]))`,
+			`INSERT INTO "%s".transactions (id, timestamp, reference, postings, metadata, pre_commit_volumes, post_commit_volumes) (SELECT * FROM unnest($1::int[], $2::timestamp[], $3::varchar[], $4::jsonb[], $5::jsonb[], $6::jsonb[], $7::jsonb[]))`,
 			s.schema.Name())
 		args = []interface{}{
 			ids, timestamps, references, postingDataSet,
