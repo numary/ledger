@@ -434,11 +434,8 @@ func TestGetTransactions(t *testing.T) {
 						Timestamp: now.Add(-1 * time.Hour),
 					},
 				}
-				log1 := core.NewTransactionLog(nil, tx1)
-				log2 := core.NewTransactionLog(&log1, tx2)
-				log3 := core.NewTransactionLog(&log2, tx3)
 				store := internal.GetStore(t, driver, ctx)
-				err := store.AppendLog(context.Background(), log1, log2, log3)
+				err := store.Commit(context.Background(), tx1, tx2, tx3)
 				require.NoError(t, err)
 
 				rsp := internal.CountTransactions(api, url.Values{})
@@ -665,8 +662,6 @@ func TestGetTransactionsWithPageSize(t *testing.T) {
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				now := time.Now().UTC()
-				var previousLog *core.Log
-				logs := make([]core.Log, 0)
 				store := internal.GetStore(t, driver, context.Background())
 
 				for i := 0; i < 3*controllers.MaxPageSize; i++ {
@@ -684,11 +679,8 @@ func TestGetTransactionsWithPageSize(t *testing.T) {
 							Timestamp: now,
 						},
 					}
-					log := core.NewTransactionLog(previousLog, tx)
-					logs = append(logs, log)
-					previousLog = &log
+					require.NoError(t, store.Commit(ctx, tx))
 				}
-				require.NoError(t, store.AppendLog(context.Background(), logs...))
 
 				t.Run("invalid page size", func(t *testing.T) {
 					rsp := internal.GetTransactions(api, url.Values{

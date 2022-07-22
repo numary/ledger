@@ -14,11 +14,6 @@ func (l *Ledger) processTx(ctx context.Context, ts []core.TransactionData) (*Com
 		return nil, errors.Wrap(err, "loading mapping")
 	}
 
-	lastLog, err := l.store.LastLog(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	var nextTxId uint64
 	lastTx, err := l.store.GetLastTransaction(ctx)
 	if err != nil {
@@ -32,7 +27,6 @@ func (l *Ledger) processTx(ctx context.Context, ts []core.TransactionData) (*Com
 
 	generatedTxs := make([]core.Transaction, 0)
 	accounts := make(map[string]*core.Account, 0)
-	generatedLogs := make([]core.Log, 0)
 	contracts := make([]core.Contract, 0)
 	if mapping != nil {
 		contracts = append(contracts, mapping.Contracts...)
@@ -48,7 +42,7 @@ func (l *Ledger) processTx(ctx context.Context, ts []core.TransactionData) (*Com
 		if len(t.Postings) == 0 {
 			return nil, NewTransactionCommitError(i, NewValidationError("transaction has no postings"))
 		}
-		if lastLog != nil && t.Timestamp.Before(lastLog.Date) {
+		if lastTx != nil && t.Timestamp.Before(lastTx.Timestamp) {
 			return nil, NewTransactionCommitError(i, NewValidationError("cannot pass a date prior to the last transaction"))
 		}
 
@@ -112,10 +106,8 @@ func (l *Ledger) processTx(ctx context.Context, ts []core.TransactionData) (*Com
 			PostCommitVolumes: txVolumeAggregator.postCommitVolumes(),
 			PreCommitVolumes:  txVolumeAggregator.preCommitVolumes(),
 		}
+		lastTx = &tx
 		generatedTxs = append(generatedTxs, tx)
-		newLog := core.NewTransactionLogWithDate(lastLog, tx, tx.Timestamp)
-		lastLog = &newLog
-		generatedLogs = append(generatedLogs, newLog)
 		nextTxId++
 	}
 
@@ -123,6 +115,5 @@ func (l *Ledger) processTx(ctx context.Context, ts []core.TransactionData) (*Com
 		PreCommitVolumes:      volumeAggregator.aggregatedPreCommitVolumes(),
 		PostCommitVolumes:     volumeAggregator.aggregatedPostCommitVolumes(),
 		GeneratedTransactions: generatedTxs,
-		GeneratedLogs:         generatedLogs,
 	}, nil
 }
